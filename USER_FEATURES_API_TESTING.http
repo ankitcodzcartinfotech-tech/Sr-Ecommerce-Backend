@@ -1,0 +1,486 @@
+# ============================================================
+# USER FEATURES API TESTING GUIDE
+# Orders | Reviews | Addresses
+# Base URL: http://localhost:7410/api/user
+# ============================================================
+
+# ----- STEP 1: Login and paste your token below -----
+@baseUrl     = http://localhost:7410/api/user
+@token       = PASTE_YOUR_TOKEN_HERE
+
+# ----- REAL IDs (fill after each step) -----
+@productId   = 6a2a94996044d5a7ba8916af
+@addressId   = PASTE_ADDRESS_ID_HERE
+@orderId     = 6a2b8fbe63fbfebb5d327d5c
+@reviewId    = PASTE_REVIEW_ID_HERE
+
+
+# ============================================================
+# AUTH — Get your token first
+# ============================================================
+
+### Register (skip if already registered)
+POST {{baseUrl}}/register
+Content-Type: application/json
+
+{
+  "name": "Test User",
+  "email": "test@example.com",
+  "password": "password123"
+}
+
+###
+
+### Login — copy token from response into @token above
+POST {{baseUrl}}/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password123"
+}
+
+###
+
+### Logout (Client-Side Only)
+# Note: Since the backend uses stateless JWT authentication, there is no server-side 
+# logout API. To log a user out, simply delete the JWT token from the frontend's 
+# local storage or secure storage.
+
+###
+
+### Verify OTP
+POST {{baseUrl}}/verify-otp
+Content-Type: application/json
+
+{
+  "mobileNumber": "9876543210",
+  "otp": "1234"
+}
+
+###
+
+### Resend OTP
+POST {{baseUrl}}/resend-otp
+Content-Type: application/json
+
+{
+  "mobileNumber": "9876543210"
+}
+
+###
+
+### Get Profile
+GET {{baseUrl}}/profile
+Authorization: Bearer {{token}}
+
+###
+
+
+# ============================================================
+# 1. ADDRESS MANAGEMENT
+# ============================================================
+
+### 1.1 Add Home Address (copy _id → paste into @addressId above)
+POST {{baseUrl}}/addresses/add
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "fullName": "Rahul Shah",
+  "phone": "9876543210",
+  "addressLine1": "123 Main Street",
+  "addressLine2": "Near City Mall",
+  "city": "Surat",
+  "state": "Gujarat",
+  "pincode": "395001",
+  "country": "India",
+  "addressType": "Home",
+  "isDefault": true
+}
+
+###
+
+### 1.2 Add Work Address
+POST {{baseUrl}}/addresses/add
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "fullName": "Rahul Shah",
+  "phone": "9876543210",
+  "addressLine1": "Office Block B, Ring Road",
+  "addressLine2": "",
+  "city": "Surat",
+  "state": "Gujarat",
+  "pincode": "395002",
+  "country": "India",
+  "addressType": "Work",
+  "isDefault": false
+}
+
+###
+
+### 1.3 Get All Addresses
+GET {{baseUrl}}/addresses
+Authorization: Bearer {{token}}
+
+###
+
+### 1.4 Get Single Address
+GET {{baseUrl}}/addresses/{{addressId}}
+Authorization: Bearer {{token}}
+
+###
+
+### 1.5 Update Address
+PUT {{baseUrl}}/addresses/{{addressId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "addressLine2": "Beside Lemon Tree Hotel",
+  "phone": "9123456789"
+}
+
+###
+
+### 1.6 Set as Default Address
+PUT {{baseUrl}}/addresses/{{addressId}}/set-default
+Authorization: Bearer {{token}}
+
+###
+
+### 1.7 Delete Address
+DELETE {{baseUrl}}/addresses/{{addressId}}
+Authorization: Bearer {{token}}
+
+###
+
+
+# ============================================================
+# 2. ORDER / CHECKOUT SYSTEM
+#
+# YOUR CART IS CURRENTLY EMPTY — follow steps in order:
+#   ① Run 2.1  →  adds Cotton Saree to cart
+#   ② Run 2.2  →  confirm cart has items
+#   ③ Run 1.1  →  add address (if not done), copy _id → @addressId
+#   ④ Run 2.3  →  place order, copy order._id → @orderId
+#   ⑤ Run 2.8 / 2.9 / 2.10 to view / track / cancel
+# ============================================================
+
+### 2.1 ① Add Cotton Saree to Cart  ← RUN THIS FIRST
+POST {{baseUrl}}/cart/add
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "productId": "6a2a94996044d5a7ba8916af",
+  "quantity": 2
+}
+
+###
+
+### 2.2 ② View Cart (confirm items are added)
+GET {{baseUrl}}/cart
+Authorization: Bearer {{token}}
+
+###
+
+### 2.3 ③ Create Order — COD
+# Requires: @addressId to be set at top (run 1.1 first)
+# After success: copy "order._id" from response → paste into @orderId above
+POST {{baseUrl}}/orders/create
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "addressId": "{{addressId}}",
+  "paymentMethod": "COD",
+  "shippingCost": 50,
+  "notes": "Please deliver before 6 PM"
+}
+
+###
+
+### 2.4 Create Order — Online Payment
+POST {{baseUrl}}/orders/create
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "addressId": "{{addressId}}",
+  "paymentMethod": "Online",
+  "shippingCost": 0,
+  "notes": ""
+}
+
+###
+
+### 2.5 Get All Orders (Order History)
+GET {{baseUrl}}/orders
+Authorization: Bearer {{token}}
+
+###
+
+### 2.6 Get Orders with Pagination
+GET {{baseUrl}}/orders?page=1&limit=5
+Authorization: Bearer {{token}}
+
+###
+
+### 2.7 Filter Orders by Status
+# Status: Pending | Confirmed | Processing | Shipped | Delivered | Cancelled
+GET {{baseUrl}}/orders?status=Pending
+Authorization: Bearer {{token}}
+
+###
+
+### 2.8 Get Single Order Details
+GET {{baseUrl}}/orders/{{orderId}}
+Authorization: Bearer {{token}}
+
+###
+
+### 2.9 Track Order (timeline view)
+GET {{baseUrl}}/orders/{{orderId}}/track
+Authorization: Bearer {{token}}
+
+###
+
+### 2.10 Cancel Order (only if status = Pending or Confirmed)
+PUT {{baseUrl}}/orders/{{orderId}}/cancel
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "cancelReason": "Changed my mind"
+}
+
+###
+
+
+# ============================================================
+# 3. PRODUCT REVIEWS & RATINGS
+# Note: Order must have status = "Delivered" to add a review
+# ============================================================
+
+### 3.1 Add Review — JSON (no image)
+# orderId must be a DELIVERED order containing this product
+POST {{baseUrl}}/reviews/add
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "productId": "{{productId}}",
+  "orderId": "{{orderId}}",
+  "rating": 5,
+  "title": "Excellent Cotton Saree!",
+  "comment": "Very happy with the quality and colour. The fabric is soft and comfortable. Will buy again."
+}
+
+###
+
+### 3.2 Add Review with Image Upload (multipart)
+POST {{baseUrl}}/reviews/add
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
+
+------WebKitFormBoundary
+Content-Disposition: form-data; name="productId"
+
+{{productId}}
+------WebKitFormBoundary
+Content-Disposition: form-data; name="orderId"
+
+{{orderId}}
+------WebKitFormBoundary
+Content-Disposition: form-data; name="rating"
+
+4
+------WebKitFormBoundary
+Content-Disposition: form-data; name="title"
+
+Good Saree
+------WebKitFormBoundary
+Content-Disposition: form-data; name="comment"
+
+Nice quality but delivery took 5 days.
+------WebKitFormBoundary--
+
+###
+
+### 3.3 Get All Reviews for Cotton Saree
+GET {{baseUrl}}/reviews/product/{{productId}}
+Authorization: Bearer {{token}}
+
+###
+
+### 3.4 Get Reviews — Paginated & Sorted
+# Sort options: newest | oldest | highest | lowest | helpful
+GET {{baseUrl}}/reviews/product/{{productId}}?page=1&limit=5&sort=highest
+Authorization: Bearer {{token}}
+
+###
+
+### 3.5 Get My Reviews
+GET {{baseUrl}}/reviews/my-reviews
+Authorization: Bearer {{token}}
+
+###
+
+### 3.6 Get My Reviews — Paginated
+GET {{baseUrl}}/reviews/my-reviews?page=1&limit=10
+Authorization: Bearer {{token}}
+
+###
+
+### 3.7 Edit My Review (copy review _id → paste into @reviewId above)
+PUT {{baseUrl}}/reviews/{{reviewId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "rating": 4,
+  "title": "Updated: Great Saree",
+  "comment": "After wearing for a month, quality is still good. Colour hasn't faded."
+}
+
+###
+
+### 3.8 Vote Review as Helpful
+POST {{baseUrl}}/reviews/{{reviewId}}/vote
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "vote": "helpful"
+}
+
+###
+
+### 3.9 Vote Review as Not Helpful
+POST {{baseUrl}}/reviews/{{reviewId}}/vote
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "vote": "not_helpful"
+}
+
+###
+
+### 3.10 Delete My Review
+DELETE {{baseUrl}}/reviews/{{reviewId}}
+Authorization: Bearer {{token}}
+
+###
+
+
+# ============================================================
+# PRODUCT REFERENCE (Cotton Saree Collection)
+# ============================================================
+# _id          : 6a2a94996044d5a7ba8916af
+# name         : Cotton Saree Collection
+# salePrice    : ₹899
+# discount     : 5%
+# stock        : 100 pcs
+# HSN Code     : HSN5208
+# Item Code    : SAREE-COTTON-001
+#
+# Variants:
+#   1. SKU: COT-PINK-BP  | Pink  | Cotton | Block Print | Stock: 20 | ₹899
+#   2. SKU: COT-YELLOW-BP | Yellow | Cotton | Block Print | Stock: 18 | ₹899
+# ============================================================
+
+# ============================================================
+# SEARCH HISTORY API TESTING GUIDE
+# Base URL: http://localhost:7410/api/user/search-history
+# ============================================================
+
+# ----- STEP 1: Login and paste your token below -----
+@baseUrl     = http://localhost:7410/api/user/search-history
+@token       = PASTE_YOUR_TOKEN_HERE
+
+# ----- REAL IDs (fill after each step) -----
+@searchHistoryId = PASTE_SEARCH_HISTORY_ITEM_ID_HERE
+
+# ============================================================
+# 1. SAVE / TRACK SEARCH QUERY
+# ============================================================
+
+### 1.1 Save a new search query (or update count if exists)
+POST {{baseUrl}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "query": "saree"
+}
+
+###
+
+### 1.2 Save another search query
+POST {{baseUrl}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "query": "cotton silk saree"
+}
+
+###
+
+### 1.3 Update the count of an existing query (run 1.1 again to test increment)
+POST {{baseUrl}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "query": "saree"
+}
+
+###
+
+# ============================================================
+# 2. FETCH SEARCH HISTORIES & TRENDS
+# ============================================================
+
+### 2.1 Get Recent Searches for Logged-in User
+# Should return the most recently searched items first
+GET {{baseUrl}}?limit=10
+Authorization: Bearer {{token}}
+
+###
+
+### 2.2 Get Globally Trending Searches
+# Aggregates searches across all users and returns highest count first
+GET {{baseUrl}}/trending?limit=10
+Authorization: Bearer {{token}}
+
+###
+
+### 2.3 Get Quick Search Suggestions
+# Useful for autocomplete: finds existing queries matching the 'q' parameter
+GET {{baseUrl}}/suggestions?q=saree&limit=5
+Authorization: Bearer {{token}}
+
+###
+
+# ============================================================
+# 3. DELETE SEARCH HISTORY
+# ============================================================
+
+### 3.1 Delete a specific search history item
+# Requires: @searchHistoryId to be set at top (copy from 2.1 response)
+DELETE {{baseUrl}}/{{searchHistoryId}}
+Authorization: Bearer {{token}}
+
+###
+
+### 3.2 Clear ALL search history for the logged-in user
+DELETE {{baseUrl}}
+Authorization: Bearer {{token}}
+
+
+
