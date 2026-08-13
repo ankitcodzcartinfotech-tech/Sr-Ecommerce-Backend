@@ -30,8 +30,8 @@ const allowedOrigins = [
     'http://localhost:3000',
     'http://localhost:3001',
     'http://localhost:3002',
-    'https://sr-ecommerce-user.netlify.app'
-];
+    process.env.FRONTEND_URL
+].filter(Boolean);
 
 app.use(
     cors({
