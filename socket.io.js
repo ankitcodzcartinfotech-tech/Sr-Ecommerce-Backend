@@ -13,8 +13,7 @@ const initSocket = (server) => {
                 'http://localhost:3001',
                 'http://localhost:3002',
                 'http://localhost:3003',
-                'https://keshrag-user.vercel.app',
-                'https://keshrag-admin-nine.vercel.app'
+                'https://sr-ecommerce-user.netlify.app'
             ],
             methods: ['GET', 'POST'],
             credentials: true
