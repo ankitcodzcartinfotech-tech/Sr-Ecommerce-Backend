@@ -30,8 +30,6 @@ const allowedOrigins = [
     'http://localhost:3000',
     'http://localhost:3001',
     'http://localhost:3002',
-    'https://keshrag-admin-nine.vercel.app',
-    'https://keshrag-user.vercel.app'
 ];
 
 app.use(
@@ -84,17 +82,17 @@ app.use((err, req, res, next) => {
 async function migrateSlugs() {
     try {
         const PRODUCT = require('./model/product.model');
-        const productsWithoutSlug = await PRODUCT.find({ 
+        const productsWithoutSlug = await PRODUCT.find({
             $or: [
                 { slug: { $exists: false } },
                 { slug: null },
                 { slug: "" }
             ]
         });
-        
+
         if (productsWithoutSlug.length > 0) {
             console.log(`Running slug migration for ${productsWithoutSlug.length} products...`);
-            
+
             const slugify = (text) => {
                 return text
                     .toString()
@@ -110,9 +108,9 @@ async function migrateSlugs() {
                 let slug = slugify(name);
                 let uniqueSlug = slug;
                 let counter = 1;
-                
+
                 while (true) {
-                    const existingProduct = await PRODUCT.findOne({ 
+                    const existingProduct = await PRODUCT.findOne({
                         slug: uniqueSlug,
                         _id: { $ne: product._id }
                     });
@@ -122,7 +120,7 @@ async function migrateSlugs() {
                     uniqueSlug = `${slug}-${counter}`;
                     counter++;
                 }
-                
+
                 product.slug = uniqueSlug;
                 await product.save();
                 console.log(`Migrated product "${name}" with slug "${uniqueSlug}"`);
@@ -142,7 +140,7 @@ async function connectDB() {
         await mongoose.connect(process.env.MONGO_DB);
 
         console.log('✅ DB is connected...');
-        
+
         await migrateSlugs();
     } catch (error) {
         console.error('❌ MongoDB Connection Error:', error.message);
