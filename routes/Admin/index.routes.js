@@ -30,6 +30,7 @@ const adminRoutes = require('./admin.routes');
 const bannerRoutes = require('./banner.routes');
 const contactRoutes = require('./contact.routes');
 const notificationRoutes = require('./notification.routes');
+const storyRoutes = require('./story.routes');
 
 const { adminVerifyToken } = require('../../helper/admin.verifyToken');
 
@@ -61,6 +62,7 @@ router.use('/payments', adminVerifyToken, paymentsRoutes);
 router.use('/banners', adminVerifyToken, bannerRoutes);
 router.use('/contacts', adminVerifyToken, contactRoutes);
 router.use('/notifications', adminVerifyToken, notificationRoutes);
+router.use('/stories', adminVerifyToken, storyRoutes);
 router.use('/', adminRoutes);
        
 module.exports = router;
