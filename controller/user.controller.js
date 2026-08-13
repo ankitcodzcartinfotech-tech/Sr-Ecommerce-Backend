@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
 const USER = require('../model/user.model');
-const ROLE = require('../model/role.model');
+
 const JWT = require('jsonwebtoken');
 const { addUserSchema, updateUserSchema, validateBodyData } = require('../helper/validator');
 const { getProfileImage } = require('../helper/image');
@@ -64,15 +64,7 @@ exports.register = async (req, res) => {
             });
         }
 
-        let defaultRole = await ROLE.findOne({ name: /customer/i });
-
-        if (!defaultRole) {
-            defaultRole = await ROLE.findOne({});
-        }
-
-        if (!defaultRole) {
-            defaultRole = await ROLE.create({ name: 'Customer' });
-        }
+        let defaultRole = 'Customer';
 
         // Generate OTP
         const otp = generateOTP();
@@ -87,7 +79,7 @@ exports.register = async (req, res) => {
             existingUser.otpExpiresAt = otpExpiresAt;
             existingUser.otpAttempts = 1;
             existingUser.lastOtpSentAt = new Date();
-            existingUser.role = defaultRole._id;
+            existingUser.role = defaultRole;
             existingUser.profileImage = 'uploads/default-user.png';
             await existingUser.save();
             user = existingUser;
@@ -96,7 +88,7 @@ exports.register = async (req, res) => {
                 name,
                 mobileNumber,
                 profileImage: 'uploads/default-user.png',
-                role: defaultRole._id,
+                role: defaultRole,
                 otp: hashedOtp,
                 otpExpiresAt,
                 otpAttempts: 1,
@@ -198,7 +190,7 @@ exports.verifyOTP = async (req, res) => {
             });
         }
 
-        const user = await USER.findOne({ mobileNumber }).populate('role');
+        const user = await USER.findOne({ mobileNumber });
 
         if (!user) {
             return res.status(404).json({
@@ -254,8 +246,7 @@ exports.verifyOTP = async (req, res) => {
         );
 
         const userResponse = user.toObject();
-        // Flatten role object to just the role name string
-        if (userResponse.role && userResponse.role.name) {
+        if (userResponse.role && typeof userResponse.role === 'object' && userResponse.role.name) {
             userResponse.role = userResponse.role.name;
         }
         delete userResponse.otp;
@@ -386,8 +377,7 @@ exports.getProfile = async (req, res) => {
         const userId = req.user._id;
 
         const user = await USER.findById(userId)
-            .select('-password')
-            .populate('role');
+            .select('-password');
 
         if (!user) {
             return res.status(404).json({
@@ -451,8 +441,7 @@ exports.updateProfile = async (req, res) => {
             updateData,
             { returnDocument: 'after', runValidators: true }
         )
-            .select('-password')
-            .populate('role');
+            .select('-password');
 
         res.status(200).json({
             success: true,
@@ -494,11 +483,7 @@ exports.addUser = async (req, res) => {
             return res.status(400).json({ message: `User is already found with this mobile number` });
         }
 
-        const roleExists = await ROLE.findById(role);
 
-        if (!roleExists) {
-            return res.status(400).json({ message: `Role not found` });
-        }
 
         user = await USER.create({
             name,
@@ -509,8 +494,7 @@ exports.addUser = async (req, res) => {
         });
 
         const createdUser = await USER.findById(user._id)
-            .select('-password')
-            .populate('role');
+            .select('-password');
 
         res.status(201).json({ message: `User create successfully....`, user: createdUser });
 
@@ -524,7 +508,6 @@ exports.getUsers = async (req, res) => {
     try {
         const users = await USER.find()
             .select('-password')
-            .populate('role')
             .sort({ createdAt: -1 });
 
         res.status(200).json({ message: `Users fetched successfully....`, users });
@@ -540,8 +523,7 @@ exports.getUser = async (req, res) => {
         const { id } = req.params;
 
         const user = await USER.findById(id)
-            .select('-password')
-            .populate('role');
+            .select('-password');
 
         if (!user) {
             return res.status(404).json({ message: `User not found` });
@@ -587,13 +569,7 @@ exports.updateUser = async (req, res) => {
             }
         }
 
-        if (role) {
-            const roleExists = await ROLE.findById(role);
 
-            if (!roleExists) {
-                return res.status(400).json({ message: `Role not found` });
-            }
-        }
 
         const updateData = { name, mobileNumber, role };
 
@@ -606,8 +582,7 @@ exports.updateUser = async (req, res) => {
             updateData,
             { returnDocument: 'after', runValidators: true }
         )
-            .select('-password')
-            .populate('role');
+            .select('-password');
 
         res.status(200).json({ message: `User updated successfully....`, user: updatedUser });
 

@@ -22,6 +22,7 @@ const questionRoutes = require('./question.routes');
 const answerRoutes = require('./answer.routes');
 const contactRoutes = require('./contact.routes');
 const notificationRoutes = require('./notification.routes');
+const storyRoutes = require('./story.routes');
 
 router.post('/register', userController.register);
 router.post('/login', userController.login);
@@ -37,6 +38,7 @@ router.use('/cart', userVerifyToken, cartRoutes);
 router.use('/wishlist', userVerifyToken, wishlistRoutes);
 router.use('/recently-viewed', userVerifyToken, recentlyViewedRoutes);
 router.use('/banners', bannerRoutes);
+router.use('/stories', storyRoutes);
 router.use('/products', productRoutes);
 router.use('/categories', categoryRoutes);
 router.use('/orders', userVerifyToken, orderRoutes);
