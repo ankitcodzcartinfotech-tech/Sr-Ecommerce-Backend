@@ -1,6 +1,6 @@
 const { uploadToCloudinary, uploadMultipleToCloudinary } = require('./upload');
 
-const getProfileImage = async (req, fieldName = 'profileImage', folder = 'keshrag') => {
+const getProfileImage = async (req, fieldName = 'profileImage', folder = 'Sr Software ') => {
     // If we have a file in req.file
     if (req.file && req.file.fieldname === fieldName) {
         try {
@@ -24,7 +24,7 @@ const getProfileImage = async (req, fieldName = 'profileImage', folder = 'keshra
     if (req.body.generalDetails) {
         let genDetails = req.body.generalDetails;
         if (typeof genDetails === 'string') {
-            try { genDetails = JSON.parse(genDetails); } catch (e) {}
+            try { genDetails = JSON.parse(genDetails); } catch (e) { }
         }
         if (genDetails && genDetails[fieldName]) {
             // If it's already a URL, keep it as is
@@ -36,7 +36,7 @@ const getProfileImage = async (req, fieldName = 'profileImage', folder = 'keshra
     const existingVal = req.body[fieldName];
     return existingVal;
 };
-const getMultipleImages = async (req, fieldName = 'images', folder = 'keshrag') => {
+const getMultipleImages = async (req, fieldName = 'images', folder = 'Sr Software ') => {
     let newImages = [];
     if (req.files && Array.isArray(req.files) && req.files.length > 0) {
         try {
@@ -60,12 +60,12 @@ const getMultipleImages = async (req, fieldName = 'images', folder = 'keshrag') 
             existingImages = [existingImages];
         }
     }
-    
+
     // Ensure existingImages is always an array
     if (!Array.isArray(existingImages)) {
         existingImages = [existingImages];
     }
-    
+
     // Filter out any empty strings
     existingImages = existingImages.filter(img => img && img.trim() !== "");
 

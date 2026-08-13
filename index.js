@@ -30,6 +30,9 @@ const allowedOrigins = [
     'http://localhost:3000',
     'http://localhost:3001',
     'http://localhost:3002',
+    'http://192.168.1.19:3000',
+    'https://sr-ecommerce-user.netlify.app',
+    'https://keshrag-user.vercel.app',
     process.env.FRONTEND_URL
 ].filter(Boolean);
 
@@ -65,7 +68,7 @@ app.use('/api', routes);
 app.get('/', (req, res) => {
     res.status(200).json({
         success: true,
-        message: 'Keshrag Backend API Running Successfully 🚀'
+        message: 'Sr Software  Backend API Running Successfully 🚀'
     });
 });
 

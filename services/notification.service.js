@@ -12,7 +12,7 @@ const notificationConfig = {
     ORDER_CANCELLED: { title: 'Order Cancelled', icon: 'x-circle', priority: 'HIGH', link: (data) => `/orders/${data.orderId}` },
     ORDER_RETURNED: { title: 'Order Returned', icon: 'rotate-ccw', priority: 'MEDIUM', link: (data) => `/orders/${data.orderId}` },
     REFUND_PROCESSED: { title: 'Refund Processed', icon: 'dollar-sign', priority: 'HIGH', link: (data) => `/orders/${data.orderId}` },
-    WELCOME: { title: 'Welcome to Keshrag!', icon: 'sparkles', priority: 'MEDIUM', link: () => '/' },
+    WELCOME: { title: 'Welcome to Sr Software !', icon: 'sparkles', priority: 'MEDIUM', link: () => '/' },
     PROFILE_COMPLETED: { title: 'Profile Completed!', icon: 'user-check', priority: 'LOW', link: () => '/account' },
     PASSWORD_CHANGED: { title: 'Password Changed', icon: 'shield', priority: 'MEDIUM', link: () => '/account' },
     EMAIL_VERIFIED: { title: 'Email Verified', icon: 'check', priority: 'LOW', link: () => '/account' },
@@ -37,9 +37,9 @@ const notificationConfig = {
 const sendNotification = async (options) => {
     try {
         const { type, message, userId, metadata = {}, isAdmin = false } = options;
-        
+
         const config = notificationConfig[type] || { title: 'Notification', icon: 'bell', priority: 'MEDIUM' };
-        
+
         // Create notification object with generated ID to allow immediate emitting
         const mongoose = require('mongoose');
         const notificationData = {
@@ -53,12 +53,12 @@ const sendNotification = async (options) => {
             isAdmin,
             user: isAdmin ? undefined : userId
         };
-        
+
         // Add link if configured
         if (config.link) {
             notificationData.link = config.link(metadata);
         }
-        
+
         // Emit via Socket.IO immediately without waiting for DB
         if (isAdmin) {
             emitToAdmins('notification:new', notificationData);
@@ -66,21 +66,21 @@ const sendNotification = async (options) => {
         } else if (userId) {
             emitToUser(userId, 'notification:new', notificationData);
             console.log(`[Notification Service] Sent notification to user ${userId}: ${type}`);
-            
+
             // Emit to order room if orderId exists
             if (metadata.orderId) {
                 emitToOrderRoom(metadata.orderId.toString(), 'order:status_update', notificationData);
             }
         }
-        
+
         // Save to database asynchronously
         const notification = await Notification.create(notificationData);
-        
+
         // TODO: Send FCM notification (will implement in Phase 3)
         // if (userId && !isAdmin) {
         //     await sendFCMNotification(userId, notification);
         // }
-        
+
         return notification;
     } catch (error) {
         console.error('[Notification Service] Error sending notification:', error);
@@ -94,7 +94,7 @@ const sendNotification = async (options) => {
 const sendBulkNotifications = async (userIds, type, message, metadata = {}) => {
     try {
         const config = notificationConfig[type] || { title: 'Notification', icon: 'bell', priority: 'MEDIUM' };
-        
+
         const mongoose = require('mongoose');
         const notifications = userIds.map(userId => ({
             _id: new mongoose.Types.ObjectId(),
@@ -107,15 +107,15 @@ const sendBulkNotifications = async (userIds, type, message, metadata = {}) => {
             metadata,
             link: config.link ? config.link(metadata) : undefined
         }));
-        
+
         // Emit to each user immediately
         for (const notification of notifications) {
             emitToUser(notification.user, 'notification:new', notification);
         }
-        
+
         // Save to database asynchronously
         await Notification.insertMany(notifications);
-        
+
         console.log(`[Notification Service] Sent bulk notification to ${userIds.length} users: ${type}`);
         return notifications;
     } catch (error) {
@@ -133,15 +133,15 @@ const markNotificationRead = async (notificationId, userId) => {
         if (!notification) {
             throw new Error('Notification not found');
         }
-        
+
         if (notification.user.toString() !== userId.toString()) {
             throw new Error('Unauthorized');
         }
-        
+
         notification.isRead = true;
         notification.readAt = new Date();
         await notification.save();
-        
+
         return notification;
     } catch (error) {
         console.error('[Notification Service] Error marking notification as read:', error);
@@ -170,20 +170,20 @@ const markAllNotificationsRead = async (userId) => {
  */
 const getUserNotifications = async (userId, options = {}) => {
     const { page = 1, limit = 20, unreadOnly = false } = options;
-    
+
     const query = { user: userId, isAdmin: false };
     if (unreadOnly) {
         query.isRead = false;
     }
-    
+
     const notifications = await Notification.find(query)
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
         .limit(parseInt(limit));
-    
+
     const unreadCount = await Notification.countDocuments({ user: userId, isRead: false, isAdmin: false });
     const total = await Notification.countDocuments({ user: userId, isAdmin: false });
-    
+
     return { notifications, unreadCount, total };
 };
 

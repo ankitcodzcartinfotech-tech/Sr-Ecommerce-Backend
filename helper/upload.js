@@ -7,7 +7,7 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 // Function to upload single file to Cloudinary
-const uploadToCloudinary = async (fileBuffer, folder = "keshrag") => {
+const uploadToCloudinary = async (fileBuffer, folder = "Sr Software ") => {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
       { folder },
@@ -21,7 +21,7 @@ const uploadToCloudinary = async (fileBuffer, folder = "keshrag") => {
 };
 
 // Function to upload multiple files to Cloudinary
-const uploadMultipleToCloudinary = async (files, folder = "keshrag") => {
+const uploadMultipleToCloudinary = async (files, folder = "Sr Software ") => {
   if (!files || files.length === 0) {
     return [];
   }

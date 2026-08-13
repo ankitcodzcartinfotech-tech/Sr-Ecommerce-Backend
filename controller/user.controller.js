@@ -97,7 +97,7 @@ exports.register = async (req, res) => {
         }
 
         // Send SMS
-        const smsMessage = `Your Keshrag verification code is: ${otp}. Valid for 5 minutes. Do not share this code.`;
+        const smsMessage = `Your Sr Software  verification code is: ${otp}. Valid for 5 minutes. Do not share this code.`;
         await smsService.sendSMS(mobileNumber, smsMessage);
 
         res.status(201).json({
@@ -149,7 +149,7 @@ exports.login = async (req, res) => {
         const otp = generateOTP();
         const hashedOtp = await hashOTP(otp);
         const otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000);
-        
+
         user.otp = hashedOtp;
         user.otpExpiresAt = otpExpiresAt;
         user.otpAttempts = rateLimit.attempts + 1;
@@ -160,7 +160,7 @@ exports.login = async (req, res) => {
         await user.save();
 
         // Send SMS
-        const smsMessage = `Your Keshrag login code is: ${otp}. Valid for 5 minutes. Do not share this code.`;
+        const smsMessage = `Your Sr Software  login code is: ${otp}. Valid for 5 minutes. Do not share this code.`;
         await smsService.sendSMS(mobileNumber, smsMessage);
 
         res.status(200).json({
@@ -236,7 +236,7 @@ exports.verifyOTP = async (req, res) => {
         const loginInfo = await captureLoginInfo(req);
         user.lastLogin = new Date();
         user.loginInfo = loginInfo;
-     
+
         await user.save();
 
         const token = JWT.sign(
@@ -259,7 +259,7 @@ exports.verifyOTP = async (req, res) => {
             await smsService.sendLoginSMS(user);
             await sendNotification({
                 type: 'WELCOME',
-                message: 'Welcome to Keshrag! Explore our beautiful collection of premium sarees.',
+                message: 'Welcome to Sr Software! Explore our beautiful collection of Proudcts.',
                 userId: user._id,
                 metadata: { userId: user._id }
             });
@@ -275,7 +275,7 @@ exports.verifyOTP = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            message: 'Successfully authenticated. Welcome to Keshrag!',
+            message: 'Successfully authenticated. Welcome to Sr Software!',
             token,
             user: userResponse
         });
@@ -323,7 +323,7 @@ exports.resendOTP = async (req, res) => {
         const otp = generateOTP();
         const hashedOtp = await hashOTP(otp);
         const otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000);
-        
+
         user.otp = hashedOtp;
         user.otpExpiresAt = otpExpiresAt;
         user.otpAttempts = rateLimit.attempts + 1;
@@ -331,7 +331,7 @@ exports.resendOTP = async (req, res) => {
         await user.save();
 
         // Send SMS
-        const smsMessage = `Your Keshrag verification code is: ${otp}. Valid for 5 minutes. Do not share this code.`;
+        const smsMessage = `Your Software! verification code is: ${otp}. Valid for 5 minutes. Do not share this code.`;
         await smsService.sendSMS(mobileNumber, smsMessage);
 
         res.status(200).json({

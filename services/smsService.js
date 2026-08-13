@@ -44,8 +44,8 @@ class SmsService {
 
     async _sendTwilio(mobileNumber, message) {
         const accountSid = process.env.TWILIO_ACCOUNT_SID;
-        const authToken  = process.env.SMS_API_KEY;
-        const from       = process.env.SMS_SENDER_ID; // Your Twilio number e.g. +918849883692
+        const authToken = process.env.SMS_API_KEY;
+        const from = process.env.SMS_SENDER_ID; // Your Twilio number e.g. +918849883692
 
         if (!accountSid || !authToken || !from) {
             console.error('[TWILIO] Missing Twilio credentials in .env');
@@ -147,7 +147,7 @@ class SmsService {
         const phone = this._getPhone(user);
         if (!phone) return false;
 
-        const message = `Hello ${user.name || 'User'},\nYou have successfully logged in to Keshrag.\nTime: ${this._formatDate()}\nDevice: ${device}`;
+        const message = `Hello ${user.name || 'User'},\nYou have successfully logged in to Sr Software .\nTime: ${this._formatDate()}\nDevice: ${device}`;
         return await this.sendSMS(phone, message);
     }
 
@@ -155,7 +155,7 @@ class SmsService {
         const phone = this._getPhone(user);
         if (!phone) return false;
 
-        const message = `Hello ${user.name || 'User'},\nYou have successfully logged out from Keshrag.\nIf this wasn't you, contact support immediately.`;
+        const message = `Hello ${user.name || 'User'},\nYou have successfully logged out from Sr Software .\nIf this wasn't you, contact support immediately.`;
         return await this.sendSMS(phone, message);
     }
 
@@ -169,18 +169,18 @@ class SmsService {
 
         // Next-step / thank-you message per status
         const nextStepMap = {
-            'Placed':     'We will confirm your order shortly. Stay tuned!',
-            'Confirmed':  'Your order is now being prepared for processing.',
+            'Placed': 'We will confirm your order shortly. Stay tuned!',
+            'Confirmed': 'Your order is now being prepared for processing.',
             'Processing': 'We are carefully packing your items. Shipping update coming soon!',
-            'Shipped':    'Your order is on its way! Track it from the Keshrag app.',
-            'Delivered':  'Thank you for shopping with Keshrag! We hope you love it.',
-            'Cancelled':  'If you have any questions, please contact our support team.',
+            'Shipped': 'Your order is on its way! Track it from the Sr Software  app.',
+            'Delivered': 'Thank you for shopping with Sr Software ! We hope you love it.',
+            'Cancelled': 'If you have any questions, please contact our support team.',
         };
 
         if (!nextStepMap[status]) return false;
 
         const message = [
-            `Keshrag`,
+            `Sr Software `,
             ``,
             `Hi ${customerName},`,
             ``,
