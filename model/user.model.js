@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema({
     lastOtpSentAt: { type: Date },
     isVerified: { type: Boolean, default: false },
 
-    role: { type: require('mongoose').Schema.Types.ObjectId, ref: 'Role' },
+    role: { type: String, default: 'Customer' },
 
     fcmTokens: [{
         type: String
