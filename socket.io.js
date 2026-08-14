@@ -33,7 +33,7 @@ const initSocket = (server) => {
                 ) {
                     callback(null, true);
                 } else {
-                    callback(new Error('Not allowed by CORS'));
+                    callback(null, false);
                 }
             },
             methods: ['GET', 'POST'],

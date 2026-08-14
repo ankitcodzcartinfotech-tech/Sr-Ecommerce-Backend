@@ -58,7 +58,7 @@ const corsOptions = {
         if (isOriginAllowed(origin)) {
             callback(null, true);
         } else {
-            callback(new Error('Not allowed by CORS'));
+            callback(null, false);
         }
     },
     credentials: true,
@@ -67,7 +67,6 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
 
 // Middleware
 app.use(express.json());
