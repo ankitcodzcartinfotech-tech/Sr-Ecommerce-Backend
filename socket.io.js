@@ -8,13 +8,34 @@ let io;
 const initSocket = (server) => {
     io = new Server(server, {
         cors: {
-            origin: [
-                'http://localhost:3000',
-                'http://localhost:3001',
-                'http://localhost:3002',
-                'http://localhost:3003',
-                process.env.FRONTEND_URL
-            ].filter(Boolean),
+            origin: function (origin, callback) {
+                if (!origin) return callback(null, true);
+                const allowed = [
+                    'http://localhost:3000',
+                    'http://localhost:3001',
+                    'http://localhost:3002',
+                    'http://localhost:3003',
+                    'http://192.168.1.19:3000',
+                    'https://sr-ecommerce-user.netlify.app',
+                    'https://sr-ecommerce-admin.netlify.app',
+                    'https://sparkly-snickerdoodle-3778ac.netlify.app',
+                    'https://keshrag-user.vercel.app',
+                    process.env.FRONTEND_URL,
+                    process.env.ADMIN_URL
+                ].filter(Boolean);
+
+                if (allowed.includes(origin) ||
+                    /^https?:\/\/([a-zA-Z0-9-]+\.)*netlify\.app$/.test(origin) ||
+                    /^https?:\/\/([a-zA-Z0-9-]+\.)*vercel\.app$/.test(origin) ||
+                    /^https?:\/\/([a-zA-Z0-9-]+\.)*onrender\.com$/.test(origin) ||
+                    /^https?:\/\/localhost(:\d+)?$/.test(origin) ||
+                    /^https?:\/\/127\.0\.0\.1(:\d+)?$/.test(origin)
+                ) {
+                    callback(null, true);
+                } else {
+                    callback(new Error('Not allowed by CORS'));
+                }
+            },
             methods: ['GET', 'POST'],
             credentials: true
         },

@@ -30,27 +30,44 @@ const allowedOrigins = [
     'http://localhost:3000',
     'http://localhost:3001',
     'http://localhost:3002',
+    'http://localhost:3003',
     'http://192.168.1.19:3000',
     'https://sr-ecommerce-user.netlify.app',
+    'https://sr-ecommerce-admin.netlify.app',
+    'https://sparkly-snickerdoodle-3778ac.netlify.app',
     'https://keshrag-user.vercel.app',
-    process.env.FRONTEND_URL
+    process.env.FRONTEND_URL,
+    process.env.ADMIN_URL
 ].filter(Boolean);
 
-app.use(
-    cors({
-        origin: function (origin, callback) {
-            // Allow requests with no origin (curl, Postman, server-to-server)
-            if (!origin || allowedOrigins.includes(origin)) {
-                callback(null, true);
-            } else {
-                callback(new Error('Not allowed by CORS'));
-            }
-        },
-        credentials: true,
-        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-        allowedHeaders: ['Content-Type', 'Authorization']
-    })
-);
+const isOriginAllowed = (origin) => {
+    // Allow server-to-server, curl, Postman, mobile apps without origin
+    if (!origin) return true;
+    if (allowedOrigins.includes(origin)) return true;
+    // Allow any netlify, vercel, render subdomain preview or deploy
+    if (/^https?:\/\/([a-zA-Z0-9-]+\.)*netlify\.app$/.test(origin)) return true;
+    if (/^https?:\/\/([a-zA-Z0-9-]+\.)*vercel\.app$/.test(origin)) return true;
+    if (/^https?:\/\/([a-zA-Z0-9-]+\.)*onrender\.com$/.test(origin)) return true;
+    if (/^https?:\/\/localhost(:\d+)?$/.test(origin)) return true;
+    if (/^https?:\/\/127\.0\.0\.1(:\d+)?$/.test(origin)) return true;
+    return false;
+};
+
+const corsOptions = {
+    origin: function (origin, callback) {
+        if (isOriginAllowed(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 // Middleware
 app.use(express.json());
