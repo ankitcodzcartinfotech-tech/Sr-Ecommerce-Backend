@@ -136,7 +136,8 @@ exports.addProduct = async (req, res) => {
         
         if (images && images.length > 0) {
             if (parsedBody.productDetail) {
-                parsedBody.productDetail.images = images;
+                const existing = Array.isArray(parsedBody.productDetail.images) ? parsedBody.productDetail.images : [];
+                parsedBody.productDetail.images = [...existing, ...images];
             } else {
                 parsedBody.images = images;
             }
@@ -319,7 +320,8 @@ exports.updateProduct = async (req, res) => {
         
         if (images && images.length > 0) {
             if (parsedBody.productDetail) {
-                parsedBody.productDetail.images = images;
+                const existing = Array.isArray(parsedBody.productDetail.images) ? parsedBody.productDetail.images : [];
+                parsedBody.productDetail.images = [...existing, ...images];
             } else {
                 parsedBody.images = images;
             }

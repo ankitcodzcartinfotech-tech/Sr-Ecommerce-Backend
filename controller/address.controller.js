@@ -3,7 +3,8 @@ const Address = require('../model/address.model');
 exports.addAddress = async (req, res) => {
     try {
         const userId = req.user._id;
-        const { fullName, phone, addressLine1, addressLine2 = '', city, state, pincode, country = 'India', addressType = 'Home', isDefault = false } = req.body;
+        const { fullName, phone: reqPhone, mobileNumber, addressLine1, addressLine2 = '', city, state, pincode, country = 'India', addressType = 'Home', isDefault = false } = req.body;
+        const phone = reqPhone || mobileNumber;
 
         if (!fullName || !phone || !addressLine1 || !city || !state || !pincode) {
             return res.status(400).json({ success: false, message: 'fullName, phone, addressLine1, city, state and pincode are required' });
@@ -107,7 +108,8 @@ exports.updateAddress = async (req, res) => {
     try {
         const userId = req.user._id;
         const { addressId } = req.params;
-        const { fullName, phone, addressLine1, addressLine2, city, state, pincode, country, addressType, isDefault } = req.body;
+        const { fullName, phone: reqPhone, mobileNumber, addressLine1, addressLine2, city, state, pincode, country, addressType, isDefault } = req.body;
+        const phone = reqPhone || mobileNumber;
 
         const address = await Address.findOne({ _id: addressId, user: userId });
         if (!address) {

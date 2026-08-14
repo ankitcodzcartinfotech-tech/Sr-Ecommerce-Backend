@@ -123,8 +123,7 @@ const productSchema = new mongoose.Schema({
         },
         purchaseParty: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'User',
-            required: true
+            ref: 'User'
         }
     },
 
