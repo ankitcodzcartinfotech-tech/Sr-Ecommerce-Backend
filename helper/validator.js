@@ -485,14 +485,8 @@ const addProductSchema = Joi.object({
         category: Joi.string().pattern(objectIdPattern).optional().allow('', null).messages({
             'string.pattern.base': 'Category ID must be a valid MongoDB ObjectId'
         }),
-        hsnCode: Joi.string().trim().required().messages({
-            'string.empty': 'HSN Code is required',
-            'any.required': 'HSN Code is required'
-        }),
-        itemCode: Joi.string().trim().required().messages({
-            'string.empty': 'Item Code is required',
-            'any.required': 'Item Code is required'
-        }),
+        hsnCode: Joi.string().trim().optional().allow('', null),
+        itemCode: Joi.string().trim().optional().allow('', null),
         cut: Joi.number().optional().allow('', null),
         description: Joi.string().trim().optional().allow('', null),
         images: Joi.array().items(Joi.string().allow('', null)).max(10).optional(),
@@ -510,16 +504,9 @@ const addProductSchema = Joi.object({
 
         purchasePrice: Joi.number().min(0).optional().allow('', null),
         gstTax: Joi.number().min(0).optional().allow('', null),
-        purchaseDesignNo: Joi.string().trim().required().messages({
-            'string.empty': 'Purchase Design No is required',
-            'any.required': 'Purchase Design No is required'
-        }),
-        purchaseParty: Joi.string().pattern(objectIdPattern).required().messages({
-            'string.empty': 'Purchase Party is required',
-            'string.pattern.base': 'Purchase Party must be a valid MongoDB ObjectId',
-            'any.required': 'Purchase Party is required'
-        })
-    }).required(),
+        purchaseDesignNo: Joi.string().trim().optional().allow('', null),
+        purchaseParty: Joi.string().pattern(objectIdPattern).optional().allow('', null)
+    }).optional(),
     stockDetails: Joi.object({
         openingQuantity: Joi.number().min(0).optional().default(0),
         atPrice: Joi.number().min(0).optional().default(0),
@@ -529,24 +516,13 @@ const addProductSchema = Joi.object({
     }).optional(),
     variants: Joi.array().items(
         Joi.object({
-            sku: Joi.string().trim().required().messages({
-                'string.empty': 'Variant SKU is required',
-                'any.required': 'Variant SKU is required'
-            }),
+            sku: Joi.string().trim().optional().allow('', null),
             color: Joi.string().trim().optional().allow('', null),
             fabric: Joi.string().trim().optional().allow('', null),
             design: Joi.string().trim().optional().allow('', null),
             images: Joi.array().items(Joi.string()).optional(),
-            salePrice: Joi.number().min(0).required().messages({
-                'number.base': 'Variant sale price must be a number',
-                'number.min': 'Variant sale price must be positive',
-                'any.required': 'Variant sale price is required'
-            }),
-            purchasePrice: Joi.number().min(0).required().messages({
-                'number.base': 'Variant purchase price must be a number',
-                'number.min': 'Variant purchase price must be positive',
-                'any.required': 'Variant purchase price is required'
-            }),
+            salePrice: Joi.number().min(0).optional().allow(null),
+            purchasePrice: Joi.number().min(0).optional().allow(null),
             stock: Joi.number().integer().min(0).optional().default(0),
             isActive: Joi.boolean().optional().default(true)
         })
@@ -561,12 +537,8 @@ const updateProductSchema = Joi.object({
         category: Joi.string().pattern(objectIdPattern).optional().allow('', null).messages({
             'string.pattern.base': 'Category ID must be a valid MongoDB ObjectId'
         }),
-        hsnCode: Joi.string().trim().optional().messages({
-            'string.empty': 'HSN Code cannot be empty'
-        }),
-        itemCode: Joi.string().trim().optional().messages({
-            'string.empty': 'Item Code cannot be empty'
-        }),
+        hsnCode: Joi.string().trim().optional().allow('', null),
+        itemCode: Joi.string().trim().optional().allow('', null),
         cut: Joi.number().optional().allow('', null),
         description: Joi.string().trim().optional().allow('', null),
         images: Joi.array().items(Joi.string().allow('', null)).max(10).optional(),
@@ -584,12 +556,8 @@ const updateProductSchema = Joi.object({
 
         purchasePrice: Joi.number().min(0).optional().allow('', null),
         gstTax: Joi.number().min(0).optional().allow('', null),
-        purchaseDesignNo: Joi.string().trim().optional().messages({
-            'string.empty': 'Purchase Design No cannot be empty'
-        }),
-        purchaseParty: Joi.string().pattern(objectIdPattern).optional().messages({
-            'string.pattern.base': 'Purchase Party must be a valid MongoDB ObjectId'
-        })
+        purchaseDesignNo: Joi.string().trim().optional().allow('', null),
+        purchaseParty: Joi.string().pattern(objectIdPattern).optional().allow('', null)
     }).optional(),
     stockDetails: Joi.object({
         openingQuantity: Joi.number().min(0).optional(),
@@ -600,24 +568,13 @@ const updateProductSchema = Joi.object({
     }).optional(),
     variants: Joi.array().items(
         Joi.object({
-            sku: Joi.string().trim().required().messages({
-                'string.empty': 'Variant SKU is required',
-                'any.required': 'Variant SKU is required'
-            }),
+            sku: Joi.string().trim().optional().allow('', null),
             color: Joi.string().trim().optional().allow('', null),
             fabric: Joi.string().trim().optional().allow('', null),
             design: Joi.string().trim().optional().allow('', null),
             images: Joi.array().items(Joi.string()).optional(),
-            salePrice: Joi.number().min(0).required().messages({
-                'number.base': 'Variant sale price must be a number',
-                'number.min': 'Variant sale price must be positive',
-                'any.required': 'Variant sale price is required'
-            }),
-            purchasePrice: Joi.number().min(0).required().messages({
-                'number.base': 'Variant purchase price must be a number',
-                'number.min': 'Variant purchase price must be positive',
-                'any.required': 'Variant purchase price is required'
-            }),
+            salePrice: Joi.number().min(0).optional().allow(null),
+            purchasePrice: Joi.number().min(0).optional().allow(null),
             stock: Joi.number().integer().min(0).optional().default(0),
             isActive: Joi.boolean().optional().default(true)
         })

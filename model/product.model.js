@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 const variantSchema = new mongoose.Schema({
     sku: {
         type: String,
-        required: true,
         trim: true
     },
     color: {
@@ -23,17 +22,16 @@ const variantSchema = new mongoose.Schema({
     }],
     salePrice: {
         type: Number,
-        required: true,
-        min: 0
+        min: 0,
+        default: 0
     },
     purchasePrice: {
         type: Number,
-        required: true,
-        min: 0
+        min: 0,
+        default: 0
     },
     stock: {
         type: Number,
-        required: true,
         default: 0,
         min: 0
     },
@@ -65,11 +63,11 @@ const productSchema = new mongoose.Schema({
         },
         hsnCode: {
             type: String,
-            required: true
+            trim: true
         },
         itemCode: {
             type: String,
-            requird: true
+            trim: true
         },
         cut: {
             type: Number
@@ -121,8 +119,7 @@ const productSchema = new mongoose.Schema({
             type: Number
         },
         purchaseDesignNo: {
-            type: String,
-            required: true
+            type: String
         },
         purchaseParty: {
             type: mongoose.Schema.Types.ObjectId,

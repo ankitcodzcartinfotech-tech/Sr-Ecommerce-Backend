@@ -307,3 +307,90 @@ exports.voteReview = async (req, res) => {
         res.status(500).json({ success: false, message: 'Internal server error' });
     }
 };
+
+/**
+ * Admin: Get all reviews with filters
+ * GET /api/admin/reviews
+ */
+exports.getAllReviewsAdmin = async (req, res) => {
+    try {
+        const { page = 1, limit = 20, rating, search } = req.query;
+        const query = {};
+
+        if (rating && Number(rating) > 0) {
+            query.rating = Number(rating);
+        }
+
+        const skip = (parseInt(page) - 1) * parseInt(limit);
+
+        const [reviews, total] = await Promise.all([
+            Review.find(query)
+                .populate('user', 'name email profileImage')
+                .populate('product', 'productDetail.name productDetail.images slug')
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(parseInt(limit)),
+            Review.countDocuments(query)
+        ]);
+
+        res.status(200).json({
+            success: true,
+            reviews,
+            pagination: {
+                total,
+                page: parseInt(page),
+                limit: parseInt(limit),
+                totalPages: Math.ceil(total / parseInt(limit))
+            }
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+};
+
+/**
+ * Admin: Toggle review approval status
+ * PATCH /api/admin/reviews/:id/approve
+ */
+exports.toggleApproveReviewAdmin = async (req, res) => {
+    try {
+        const review = await Review.findById(req.params.id);
+        if (!review) {
+            return res.status(404).json({ success: false, message: 'Review not found' });
+        }
+
+        review.isApproved = !review.isApproved;
+        await review.save();
+
+        res.status(200).json({
+            success: true,
+            message: `Review ${review.isApproved ? 'approved' : 'unapproved'} successfully`,
+            review
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+};
+
+/**
+ * Admin: Delete review
+ * DELETE /api/admin/reviews/:id
+ */
+exports.deleteReviewAdmin = async (req, res) => {
+    try {
+        const review = await Review.findByIdAndDelete(req.params.id);
+        if (!review) {
+            return res.status(404).json({ success: false, message: 'Review not found' });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Review deleted successfully'
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+};
