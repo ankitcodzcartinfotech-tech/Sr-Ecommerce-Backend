@@ -89,7 +89,7 @@ const orderSchema = new mongoose.Schema({
     },
     party: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Parties',
+        ref: 'User',
         required: true
     },
     validDate: {

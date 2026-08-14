@@ -289,15 +289,15 @@ exports.getProduct = async (req, res) => {
         // First try to find by ObjectId
         if (mongoose.Types.ObjectId.isValid(id)) {
             product = await PRODUCT.findById(id)
-                .populate('productDetail.category')
-                .populate('purchaseDetails.purchaseParty');
+                .populate({ path: 'productDetail.category', strictPopulate: false })
+                .populate({ path: 'purchaseDetails.purchaseParty', strictPopulate: false });
         }
         
         // If not found by ObjectId, try to find by slug
         if (!product) {
             product = await PRODUCT.findOne({ slug: id })
-                .populate('productDetail.category')
-                .populate('purchaseDetails.purchaseParty');
+                .populate({ path: 'productDetail.category', strictPopulate: false })
+                .populate({ path: 'purchaseDetails.purchaseParty', strictPopulate: false });
         }
 
         if (!product) {

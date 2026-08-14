@@ -126,7 +126,7 @@ const productSchema = new mongoose.Schema({
         },
         purchaseParty: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Parties',
+            ref: 'User',
             required: true
         }
     },
