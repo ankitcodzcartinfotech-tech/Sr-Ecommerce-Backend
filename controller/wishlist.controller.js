@@ -85,7 +85,9 @@ exports.removeFromWishlist = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Wishlist not found' });
         }
 
-        const itemIndex = wishlist.items.findIndex(item => item._id.toString() === itemId);
+        const itemIndex = wishlist.items.findIndex(
+            item => item._id.toString() === itemId || item.product.toString() === itemId
+        );
         if (itemIndex === -1) {
             return res.status(404).json({ success: false, message: 'Item not found in wishlist' });
         }
@@ -122,7 +124,9 @@ exports.moveToCart = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Wishlist not found' });
         }
 
-        const itemIndex = wishlist.items.findIndex(item => item._id.toString() === itemId);
+        const itemIndex = wishlist.items.findIndex(
+            item => item._id.toString() === itemId || item.product.toString() === itemId
+        );
         if (itemIndex === -1) {
             return res.status(404).json({ success: false, message: 'Item not found in wishlist' });
         }
