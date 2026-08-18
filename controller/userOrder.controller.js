@@ -4,6 +4,7 @@ const UserOrder = require('../model/userOrder.model');
 const Address = require('../model/address.model');
 const PRODUCT = require('../model/product.model');
 const USER = require('../model/user.model');
+const Coupon = require('../model/coupon.model');
 const { sendNotification } = require('../services/notification.service');
 const { generatePremiumInvoiceBuffer } = require('../helper/pdfInvoiceGenerator');
 const smsService = require('../services/smsService');
@@ -11,7 +12,7 @@ const smsService = require('../services/smsService');
 exports.createOrder = async (req, res) => {
     try {
         const userId = req.user._id;
-        const { addressId, paymentMethod = 'COD', notes = '', shippingCost = 0 } = req.body;
+        const { addressId, paymentMethod = 'COD', notes = '', shippingCost = 0, couponCode } = req.body;
 
         // Normalize paymentMethod — frontend may send uppercase values like RAZORPAY, COD, UPI
         const PAYMENT_METHOD_MAP = {
@@ -89,7 +90,33 @@ exports.createOrder = async (req, res) => {
             return res.status(400).json({ success: false, message: 'No valid products in cart to place an order' });
         }
 
-        const totalAmount = subtotal + Number(shippingCost) + Math.round(totalGst);
+        let discountAmount = 0;
+        let appliedCouponCode = null;
+
+        if (couponCode) {
+            const coupon = await Coupon.findOne({ code: couponCode.trim().toUpperCase() });
+            
+            if (coupon && coupon.isActive && (!coupon.expiresAt || new Date() <= new Date(coupon.expiresAt))) {
+                if (coupon.usageLimit === null || coupon.usedCount < coupon.usageLimit) {
+                    if (subtotal >= coupon.minOrderAmount) {
+                        if (coupon.type === 'percentage') {
+                            discountAmount = Math.round((subtotal * coupon.value) / 100);
+                            if (coupon.maxDiscount !== null) {
+                                discountAmount = Math.min(discountAmount, coupon.maxDiscount);
+                            }
+                        } else {
+                            discountAmount = Math.min(coupon.value, subtotal);
+                        }
+                        appliedCouponCode = coupon.code;
+                        
+                        coupon.usedCount += 1;
+                        await coupon.save();
+                    }
+                }
+            }
+        }
+
+        const totalAmount = subtotal + Number(shippingCost) + Math.round(totalGst) - discountAmount;
         const totalItems = orderItems.reduce((sum, item) => sum + item.quantity, 0);
 
         const shippingAddress = {
@@ -110,6 +137,8 @@ exports.createOrder = async (req, res) => {
             paymentMethod: normalizedPayment,
             totalItems,
             subtotal,
+            discount: discountAmount,
+            couponCode: appliedCouponCode,
             totalGst: Math.round(totalGst),
             shippingCost: Number(shippingCost),
             totalAmount,
@@ -336,9 +365,23 @@ exports.generateInvoice = async (req, res) => {
 
         const pdfBuffer = await generatePremiumInvoiceBuffer(order);
 
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename="${invoiceNumber}.pdf"`);
-        res.end(pdfBuffer);
+        const cloudinary = require('../helper/cloudinary');
+        const invoiceUrl = await new Promise((resolve, reject) => {
+            const stream = cloudinary.uploader.upload_stream(
+                { folder: "invoices", resource_type: "raw", format: "pdf", public_id: invoiceNumber },
+                (error, result) => {
+                    if (error) reject(error);
+                    else resolve(result.secure_url);
+                }
+            );
+            stream.end(pdfBuffer);
+        });
+
+        res.status(200).json({
+            success: true,
+            message: 'Invoice generated successfully',
+            invoiceUrl
+        });
     } catch (error) {
         console.error('Invoice generation error:', error);
         if (!res.headersSent) {

@@ -83,6 +83,10 @@ const userOrderSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    couponCode: {
+        type: String,
+        default: null
+    },
     totalGst: {
         type: Number,
         default: 0
@@ -110,34 +114,22 @@ const userOrderSchema = new mongoose.Schema({
 
 userOrderSchema.pre('save', async function () {
     if (this.isNew && !this.orderNumber) {
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        const dateStr = `${year}${month}${day}`;
-        
-        // SOLUTION: Add User's unique short code to the prefix
-        // This makes order numbers user-wise sequential but globally unique for the Admin Panel.
-        // Also prevents MongoDB "duplicate key error" since orderNumber has `unique: true`.
-        const userShortCode = this.user.toString().slice(-4).toUpperCase();
-        
-        // Generate order number in KRG-[USERCODE]-YYYYMMDD-XXXX format
-        const prefix = `KRG-${userShortCode}-${dateStr}-`;
-        
-        // Find the last order for THIS user today to get the user-wise sequence number
+        // Find the last order to get the global sequence number
         const lastOrder = await mongoose.model('UserOrder').findOne(
-            { user: this.user, orderNumber: { $regex: `^${prefix}` } },
+            {},
             {},
             { sort: { orderNumber: -1 } }
         );
         
         let sequenceNum = 1;
-        if (lastOrder) {
-            const lastSeq = parseInt(lastOrder.orderNumber.split('-').pop());
-            sequenceNum = lastSeq + 1;
+        if (lastOrder && lastOrder.orderNumber) {
+            const lastSeq = parseInt(lastOrder.orderNumber, 10);
+            if (!isNaN(lastSeq)) {
+                sequenceNum = lastSeq + 1;
+            }
         }
         
-        this.orderNumber = `${prefix}${String(sequenceNum).padStart(4, '0')}`;
+        this.orderNumber = String(sequenceNum).padStart(6, '0');
     }
 });
 

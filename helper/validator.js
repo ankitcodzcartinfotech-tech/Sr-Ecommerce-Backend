@@ -1519,9 +1519,66 @@ const updatePaymentSchema = Joi.object({
     amount: Joi.number().min(0).optional()
 }).min(1);
 
+// ==========================================
+// ADMIN AUTH & PROFILE SCHEMAS
+// ==========================================
+const strongPasswordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&^#()_+=\-\[\]{};':"\\|,.<>~`])[A-Za-z\d@$!%*?&^#()_+=\-\[\]{};':"\\|,.<>~`]{8,}$/;
+
+const adminLoginSchema = Joi.object({
+    email: Joi.string().trim().email().required().messages({
+        'string.empty': 'Email is required',
+        'string.email': 'Please enter a valid email address',
+        'any.required': 'Email is required'
+    }),
+    password: Joi.string().min(8).required().messages({
+        'string.empty': 'Password is required',
+        'string.min': 'Password must be at least 8 characters long',
+        'any.required': 'Password is required'
+    })
+});
+
+const adminRegisterSchema = Joi.object({
+    name: Joi.string().trim().min(2).max(100).required().messages({
+        'string.empty': 'Name is required',
+        'string.min': 'Name must be at least 2 characters long',
+        'string.max': 'Name cannot exceed 100 characters',
+        'any.required': 'Name is required'
+    }),
+    email: Joi.string().trim().email().required().messages({
+        'string.empty': 'Email is required',
+        'string.email': 'Please enter a valid email address',
+        'any.required': 'Email is required'
+    }),
+    password: Joi.string().min(8).max(128).pattern(strongPasswordPattern).required().messages({
+        'string.empty': 'Password is required',
+        'string.min': 'Password must be at least 8 characters long',
+        'string.pattern.base': 'Password must contain at least 8 characters, with at least one uppercase letter, one lowercase letter, one number, and one special character',
+        'any.required': 'Password is required'
+    })
+});
+
+const updateAdminProfileSchema = Joi.object({
+    name: Joi.string().trim().min(2).max(100).optional().messages({
+        'string.empty': 'Name cannot be empty',
+        'string.min': 'Name must be at least 2 characters long',
+        'string.max': 'Name cannot exceed 100 characters'
+    }),
+    email: Joi.string().trim().email().optional().messages({
+        'string.empty': 'Email cannot be empty',
+        'string.email': 'Please enter a valid email address'
+    }),
+    password: Joi.string().min(8).max(128).pattern(strongPasswordPattern).optional().allow('', null).messages({
+        'string.min': 'Password must be at least 8 characters long',
+        'string.pattern.base': 'Password must contain at least 8 characters, with at least one uppercase letter, one lowercase letter, one number, and one special character'
+    })
+}).min(1);
+
 module.exports = {
     validateBody,
     validateBodyData,
+    adminLoginSchema,
+    adminRegisterSchema,
+    updateAdminProfileSchema,
     addRoleSchema,
     updateRoleSchema,
     addUserSchema,
