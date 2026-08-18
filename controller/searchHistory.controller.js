@@ -130,11 +130,11 @@ exports.getTrendingSearches = async (req, res) => {
 // Get quick search suggestions based on partial matching
 exports.getSuggestions = async (req, res) => {
     try {
-        const q = req.query.q;
+        const q = req.query.q || req.query.query;
         const limit = parseInt(req.query.limit) || 5;
 
         if (!q || q.trim() === '') {
-            return res.status(400).json({ success: false, message: 'Search query parameter (q) is required' });
+            return res.status(400).json({ success: false, message: 'Search query parameter (q or query) is required' });
         }
 
         const suggestions = await SearchHistory.aggregate([
